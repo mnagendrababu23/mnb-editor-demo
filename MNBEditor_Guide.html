@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MNBEditor Developer Guide</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121933;
+      --panel-2: #ffffff;
+      --text: #e6ecff;
+      --muted: #9fb0da;
+      --body: #1f2937;
+      --border: #e5e7eb;
+      --code-bg: #0f172a;
+      --accent: #4f46e5;
+      --accent-2: #eef2ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #131b34 100%);
+      color: var(--text);
+    }
+    .hero {
+      padding: 48px 24px 28px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .hero-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: #c7d2fe;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 14px 0 12px;
+      font-size: 42px;
+      line-height: 1.1;
+    }
+    .subtitle {
+      max-width: 900px;
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 0;
+    }
+    .layout {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 24px;
+      padding: 24px;
+      align-items: start;
+    }
+    nav {
+      position: sticky;
+      top: 20px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 18px;
+      backdrop-filter: blur(8px);
+    }
+    nav h2 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: #c7d2fe;
+    }
+    nav a {
+      display: block;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 7px 0;
+      font-size: 14px;
+    }
+    nav a:hover { color: #fff; }
+    main {
+      background: var(--panel-2);
+      color: var(--body);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.22);
+    }
+    section { margin-bottom: 34px; }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      color: #111827;
+    }
+    h3 {
+      margin: 22px 0 10px;
+      font-size: 20px;
+      color: #1f2937;
+    }
+    p, li {
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    ul { padding-left: 22px; }
+    .card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+    }
+    pre {
+      overflow: auto;
+      background: var(--code-bg);
+      color: #e5e7eb;
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.55;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 5px 10px;
+      background: var(--accent-2);
+      color: var(--accent);
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+      margin: 4px 8px 0 0;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #eef2ff;
+      padding: 14px 16px;
+      border-radius: 0 14px 14px 0;
+    }
+    @media (max-width: 920px) {
+      .layout { grid-template-columns: 1fr; }
+      nav { position: static; }
+      h1 { font-size: 34px; }
+      main { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">Developer Guide</span>
+      <h1>MNBEditor</h1>
+      <p class="subtitle">A browser-based rich text editor with a document-style workspace, configurable toolbars, visual/code/preview modes, font management, page ruler controls, alerts, modal forms, and an extensible tool system.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav>
+      <h2>On this page</h2>
+      <a href="#overview">Overview</a>
+      <a href="#layout">Source layout</a>
+      <a href="#installation">Installation</a>
+      <a href="#entry-points">Entry points</a>
+      <a href="#presets">Toolbar presets</a>
+      <a href="#quick-start">Quick start</a>
+      <a href="#api">Core API</a>
+      <a href="#tools">Tool authoring</a>
+      <a href="#fonts">Fonts</a>
+      <a href="#branding">Branding</a>
+      <a href="#limits">Content limits</a>
+      <a href="#views">Views</a>
+      <a href="#tables">Tables</a>
+      <a href="#notes">Practical notes</a>
+    </nav>
+
+    <main>
+      <section id="overview">
+        <h2>Overview</h2>
+        <div class="grid">
+          <div class="card"><strong>Toolbar presets</strong><p><code>minimal</code>, <code>basic</code>, and <code>full</code>.</p></div>
+          <div class="card"><strong>Editing modes</strong><p>Visual editing, code view, and preview mode.</p></div>
+          <div class="card"><strong>Font system</strong><p>Built-in fonts, external web fonts, and uploaded custom font files.</p></div>
+          <div class="card"><strong>Extension model</strong><p>Plain-object tools using <code>buttonTool(...)</code> and <code>selectTool(...)</code>.</p></div>
+        </div>
+      </section>
+
+      <section id="layout">
+        <h2>Source layout</h2>
+        <pre><code>mnb-editor/
+├─ mnb-editor.main.js          # high-level mount API and toolbar presets
+├─ core/
+│  ├─ editor-core.js           # MNBEditor class and runtime/editor logic
+│  └─ toolkit.js               # tool helper wrappers
+└─ tools/
+   ├─ 01-undo.js
+   ├─ 02-redo.js
+   ├─ 03-logs.js
+   ├─ ...
+   └─ 66-print.js</code></pre>
+      </section>
+
+      <section id="installation">
+        <h2>Installation</h2>
+        <p>The provided source is set up as directly imported modules. In the snapshot you shared, there is no package manifest or published package metadata, so the cleanest documented path is source-based integration.</p>
+        <h3>Use the source files directly</h3>
+        <pre><code>&lt;div id="editor"&gt;&lt;/div&gt;
+&lt;script type="module"&gt;
+  import { mountMNBEditor } from './mnb-editor.main.js';
+
+  const editor = mountMNBEditor('#editor', {
+    value: '&lt;p&gt;Hello MNBEditor&lt;/p&gt;',
+    placeholder: 'Start typing here...',
+    toolbar: 'full',
+    theme: 'light',
+    width: 1200,
+    height: 760,
+  });
+
+  window.editor = editor;
+&lt;/script&gt;</code></pre>
+      </section>
+
+      <section id="entry-points">
+        <h2>Entry points</h2>
+        <h3><code>mountMNBEditor(target, options)</code></h3>
+        <p>Recommended application entry point. It resolves toolbar presets or custom tool lists, creates the core editor, applies dimensions, ruler visibility, branding, content limits, sticky toolbar offsets, and toolbar collapse behavior.</p>
+        <div class="card">
+          <span class="pill">tools</span>
+          <span class="pill">toolbar</span>
+          <span class="pill">ruler</span>
+          <span class="pill">width</span>
+          <span class="pill">height</span>
+          <span class="pill">contentLimit</span>
+          <span class="pill">branding</span>
+          <span class="pill">toolbarCollapsible</span>
+          <span class="pill">toolbarCollapsed</span>
+          <span class="pill">collapseToolbarBelow</span>
+          <span class="pill">collapsedToolbarRows</span>
+        </div>
+        <h3><code>createEditor(target, options)</code></h3>
+        <p>Lower-level entry point that creates a raw <code>MNBEditor</code> instance for custom integrations.</p>
+      </section>
+
+      <section id="presets">
+        <h2>Toolbar presets</h2>
+        <div class="grid">
+          <div class="card"><strong>minimal</strong><p>Undo/redo, block styles, size, core formatting, alignment, link, image, preview, export.</p></div>
+          <div class="card"><strong>basic</strong><p>Ruler, history, text controls, formatting, layout, tables, comments, preview/code/fullscreen, print, export.</p></div>
+          <div class="card"><strong>full</strong><p>Margin ruler plus the full built-in tool collection imported by <code>mnb-editor.main.js</code>.</p></div>
+        </div>
+      </section>
+
+      <section id="quick-start">
+        <h2>Quick start</h2>
+        <pre><code>import { mountMNBEditor } from './mnb-editor.main.js';
+
+const editor = mountMNBEditor('#editor', {
+  value: '&lt;p&gt;Hello world&lt;/p&gt;',
+  placeholder: 'Start typing here...',
+  theme: 'light',
+  toolbar: 'full',
+  width: 1200,
+  height: 760,
+});</code></pre>
+      </section>
+
+      <section id="api">
+        <h2>Core API</h2>
+        <p>Commonly useful methods:</p>
+        <div class="card">
+          <p><code>setHTML</code>, <code>getHTML</code>, <code>getText</code>, <code>toggleCodeView</code>, <code>togglePreview</code>, <code>updatePreview</code>, <code>insertHTML</code>, <code>insertText</code>, <code>surroundSelection</code>, <code>applyBlockStyle</code>, <code>toggleBlockClass</code>, <code>executeTool</code>, <code>saveHistory</code>, <code>undo</code>, <code>redo</code>, <code>alert</code>, <code>form</code>, <code>pickFiles</code>, <code>setTheme</code>, <code>setFontFamily</code>, <code>registerFontFace</code>, <code>registerExternalFont</code>, <code>insertTable</code>, <code>addTableRow</code>, <code>addTableColumn</code>, <code>deleteTableRow</code>, <code>deleteTableColumn</code>, <code>mergeCellRight</code>, <code>removeTable</code>, <code>setTableBorderMode</code>, <code>download</code>, <code>print</code>, <code>toggleFullscreen</code>.</p>
+        </div>
+      </section>
+
+      <section id="tools">
+        <h2>Tool authoring</h2>
+        <pre><code>import { buttonTool } from '../core/toolkit.js';
+
+export default buttonTool({
+  id: 'hello',
+  label: 'Hello',
+  icon: '👋',
+  title: 'Insert greeting',
+  async run(editor) {
+    editor.insertText('Hello');
+    editor.alert('Greeting inserted.', 'success');
+  },
+});</code></pre>
+        <p>Common tool fields include <code>id</code>, <code>label</code>, <code>title</code>, <code>icon</code>, <code>kind</code>, <code>group</code>, <code>groupLabel</code>, <code>area</code>, <code>toolbarLabel</code>, <code>toolbarVariant</code>, <code>options</code>/<code>items</code>/<code>choices</code>, <code>shortcut</code>, <code>run(editor, value)</code>, and <code>onRendered(editor, element)</code>.</p>
+      </section>
+
+      <section id="fonts">
+        <h2>Fonts</h2>
+        <p>MNBEditor supports default fonts, external web fonts, and uploaded local font files.</p>
+        <pre><code>mountMNBEditor('#editor', {
+  webFonts: [
+    {
+      label: 'Poppins',
+      href: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap',
+      value: 'Poppins, sans-serif',
+    },
+  ],
+});</code></pre>
+        <p>Accepted uploaded formats: <code>.ttf</code>, <code>.otf</code>, <code>.woff</code>, <code>.woff2</code>.</p>
+      </section>
+
+      <section id="branding">
+        <h2>Branding</h2>
+        <pre><code>mountMNBEditor('#editor', {
+  branding: {
+    text: 'My Product',
+    href: 'https://example.com',
+    target: '_blank',
+    position: 'status-right',
+  },
+});</code></pre>
+        <p>Branding can also be disabled with <code>false</code>, or set with a simple string. A floating pill-style badge is also supported.</p>
+      </section>
+
+      <section id="limits">
+        <h2>Content limits</h2>
+        <pre><code>mountMNBEditor('#editor', {
+  contentLimit: {
+    max: 300,
+    type: 'words',
+    mode: 'soft',
+    showCounter: true,
+  },
+});</code></pre>
+        <p><code>type</code> supports <code>chars</code> and <code>words</code>. <code>mode</code> supports <code>hard</code> and <code>soft</code>.</p>
+      </section>
+
+      <section id="views">
+        <h2>Views</h2>
+        <div class="note">MNBEditor supports visual mode, code mode, and preview mode. Preview is rendered inside an isolated iframe and receives external font links, generated <code>@font-face</code> CSS, and editor content.</div>
+      </section>
+
+      <section id="tables">
+        <h2>Tables</h2>
+        <pre><code>editor.insertTable(3, 4);
+editor.addTableRow();
+editor.addTableColumn();
+editor.mergeCellRight();
+editor.setTableBorderMode('outside');</code></pre>
+        <p>The border mode is stored on <code>table.dataset.borderMode</code>, which lets your CSS interpret modes such as <code>none</code>, <code>all</code>, <code>outside</code>, <code>inside</code>, <code>top</code>, <code>bottom</code>, <code>left</code>, and <code>right</code>.</p>
+      </section>
+
+      <section id="notes">
+        <h2>Practical notes</h2>
+        <ul>
+          <li>Some formatting still relies on <code>document.execCommand(...)</code>.</li>
+          <li>Preview styles are isolated inside the iframe.</li>
+          <li>Code view should stay in sync with visual mode.</li>
+          <li>Select-style tools should provide <code>options</code>, <code>items</code>, or <code>choices</code>.</li>
+        </ul>
+        <p>No license file or package metadata was included in the source snapshot, so add your own packaging and distribution details if you want to publish MNBEditor as a package.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
