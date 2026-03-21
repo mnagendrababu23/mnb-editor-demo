@@ -6,16 +6,288 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="./mnb-editor.css" />
     <style>
+      :root {
+        --bg-1: #f6f9ff;
+        --bg-2: #eef4ff;
+        --panel: rgba(255, 255, 255, 0.78);
+        --panel-solid: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --muted-soft: #94a3b8;
+        --border: rgba(148, 163, 184, 0.18);
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --primary-soft: rgba(37, 99, 235, 0.08);
+        --shadow-sm: 0 10px 30px rgba(15, 23, 42, 0.06);
+        --shadow-md: 0 18px 50px rgba(15, 23, 42, 0.1);
+        --shadow-lg: 0 30px 80px rgba(37, 99, 235, 0.15);
+        --radius-xl: 28px;
+        --radius-lg: 22px;
+        --radius-md: 16px;
+        --radius-sm: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 28%),
+          radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 26%),
+          linear-gradient(180deg, #fbfdff 0%, #f4f8ff 45%, #edf3fb 100%);
+      }
+
+      .page-shell {
+        max-width: 1450px;
+        margin: 0 auto;
+        padding: 30px 18px 42px;
+      }
+
       .editor-hero {
-        margin-bottom: 18px;
-        padding: 20px;
-        border: 1px solid #e2e8f0;
-        border-radius: 18px;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 22px;
+        padding: 30px;
+      }
+
+      .editor-hero::before {
+        content: "";
+        position: absolute;
+        left: -60px;
+        bottom: -80px;
+        width: 240px;
+        height: 240px;
+        border-radius: 999px;
+        background: none;
+        pointer-events: none;
+      }
+
+      .editor-hero::after {
+        content: "";
+        position: absolute;
+        right: -90px;
+        top: -90px;
+        width: 280px;
+        height: 280px;
+        border-radius: 999px;
+        background: none;
+        pointer-events: none;
       }
 
       .editor-hero-top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      .editor-hero-title-wrap {
+        max-width: 930px;
+      }
+
+      .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        padding: 8px 14px;
+        border: 1px solid rgba(37, 99, 235, 0.14);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--primary-dark);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+      }
+
+      .hero-kicker-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+      }
+
+      .editor-hero-title-wrap h2 {
+        margin: 0 0 12px;
+        font-size: clamp(34px, 4.5vw, 54px);
+        line-height: 1.02;
+        letter-spacing: -0.05em;
+        color: #0b1220;
+      }
+
+      .editor-hero-title-wrap p {
+        margin: 0;
+        color: #475569;
+        font-size: 16px;
+        line-height: 1.85;
+        width: max-content;
+      }
+
+      .hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.78);
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+      }
+
+      .hero-badge-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #dbeafe, #eff6ff);
+        color: var(--primary-dark);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .editor-guide-link {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 50px;
+        padding: 12px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(37, 99, 235, 0.14);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        box-shadow: var(--shadow-lg);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      }
+
+      .editor-guide-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 22px 55px rgba(37, 99, 235, 0.22);
+        opacity: 0.98;
+      }
+
+      .guide-arrow {
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .editor-hero-features {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 22px;
+      }
+
+      .editor-feature-card {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 18px;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      }
+
+      .editor-feature-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(37, 99, 235, 0.18);
+        box-shadow: 0 18px 40px rgba(37, 99, 235, 0.10);
+      }
+
+      .editor-feature-card.feature-wide {
+        grid-column: 1 / -1;
+      }
+
+      .feature-icon {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #dbeafe, #eff6ff);
+        color: var(--primary-dark);
+        font-size: 18px;
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.08);
+      }
+
+      .feature-content strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 15px;
+        color: #0f172a;
+      }
+
+      .feature-content span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .editor-stage {
+        margin-top: 4px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.62);
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-md);
+      }
+
+      #editor {
+        border-radius: 22px;
+        overflow: hidden;
+      }
+
+      .editor-bottom-panel {
+        margin-top: 22px;
+        padding: 22px;
+        border-radius: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        background:
+          linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.96) 100%);
+        box-shadow: 0 24px 70px rgba(2, 6, 23, 0.22);
+      }
+
+      .editor-bottom-head {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
@@ -24,142 +296,152 @@
         margin-bottom: 14px;
       }
 
-      .editor-hero-title-wrap h2 {
-        margin: 0 0 8px;
-        font-size: 26px;
-        line-height: 1.2;
-        color: #0f172a;
+      .editor-bottom-head h3 {
+        margin: 0 0 6px;
+        font-size: 18px;
+        color: #f8fafc;
       }
 
-      .editor-hero-title-wrap p {
+      .editor-bottom-head p {
         margin: 0;
-        color: #475569;
-        font-size: 15px;
-        line-height: 1.7;
-        max-width: 920px;
-      }
-
-      .editor-guide-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 16px;
-        border-radius: 12px;
-        background: #2563eb;
-        color: #fff;
-        font-size: 14px;
-        font-weight: 700;
-        text-decoration: none;
-        white-space: nowrap;
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
-      }
-
-      .editor-guide-link:hover {
-        opacity: 0.96;
-      }
-
-      .editor-hero-features {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 12px;
-        margin-top: 12px;
-      }
-
-      .editor-feature-card {
-        padding: 14px;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        background: #fff;
-      }
-
-      .editor-feature-card strong {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 14px;
-        color: #0f172a;
-      }
-
-      .editor-feature-card span {
-        display: block;
-        color: #64748b;
+        color: #94a3b8;
         font-size: 13px;
         line-height: 1.6;
-      }
-
-      .editor-bottom-panel {
-        margin-top: 18px;
-        padding: 16px;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        background: #f8fafc;
-      }
-
-      .editor-bottom-panel h3 {
-        margin: 0 0 12px;
-        font-size: 16px;
-        color: #0f172a;
       }
 
       .editor-bottom-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
       }
 
       .editor-bottom-actions button {
         appearance: none;
-        border: 0;
-        border-radius: 10px;
-        padding: 10px 14px;
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 12px;
+        padding: 11px 16px;
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
-        background: #2563eb;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: #fff;
+        box-shadow: 0 12px 26px rgba(37, 99, 235, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
       }
 
       .editor-bottom-actions button:hover {
-        opacity: 0.95;
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px rgba(37, 99, 235, 0.28);
       }
 
       #editorOutput {
-        min-height: 120px;
-        max-height: 320px;
+        min-height: 140px;
+        max-height: 340px;
         overflow: auto;
         margin: 0;
-        padding: 12px;
-        border-radius: 10px;
-        background: #0f172a;
-        color: #e2e8f0;
+        padding: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 18px;
+        background:
+          linear-gradient(180deg, rgba(2, 6, 23, 0.76) 0%, rgba(15, 23, 42, 0.94) 100%);
+        color: #dbeafe;
         font-size: 13px;
-        line-height: 1.5;
+        line-height: 1.7;
         white-space: pre-wrap;
         word-break: break-word;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+
+      @media (max-width: 1080px) {
+        .editor-hero-features {
+          grid-template-columns: 1fr;
+        }
+
+        .editor-feature-card.feature-wide {
+          grid-column: auto;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .page-shell {
+          padding: 18px 14px 28px;
+        }
+
+        .editor-hero,
+        .editor-bottom-panel {
+          padding: 18px;
+          border-radius: 20px;
+        }
+
+        .editor-stage {
+          padding: 10px;
+          border-radius: 20px;
+        }
+
+        .editor-hero-top {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .editor-guide-link {
+          width: 100%;
+        }
+
+        .hero-badges {
+          gap: 8px;
+        }
+
+        .hero-badge {
+          width: 100%;
+          justify-content: flex-start;
+        }
+
+        .editor-feature-card {
+          padding: 16px;
+        }
       }
     </style>
   </head>
   <body>
-    <div style="max-width:1400px;margin:30px auto;padding:0 16px;">
-      <div style="margin-bottom:18px;">
-        <h1 style="margin:0 0 8px;">MNB Editor</h1>
-        <p style="margin:0;color:#64748b;">
-          Docs-style multi-row toolbar with a ruler and draggable left/right
-          page margins. Add a new feature by creating a tool file and importing
-          it in <code>src/mnb-editor.main.js</code>.
-        </p>
-      </div>
-
+    <div class="page-shell">
       <div class="editor-hero">
         <div class="editor-hero-top">
           <div class="editor-hero-title-wrap">
+            <div class="hero-kicker">
+              <span class="hero-kicker-dot"></span>
+              Browser-based rich text editor
+            </div>
+
             <h2>MNBEditor</h2>
+
             <p>
               A browser-based rich text editor with a document-style workspace,
               configurable toolbars, visual/code/preview modes, font management,
               page ruler controls, alerts, modal forms, and an extensible tool system.
             </p>
+
+            <div class="hero-badges">
+              <span class="hero-badge">
+                <span class="hero-badge-icon">V</span>
+                Visual • Code • Preview
+              </span>
+
+              <span class="hero-badge">
+                <span class="hero-badge-icon">T</span>
+                Minimal • Basic • Full Toolbars
+              </span>
+
+              <span class="hero-badge">
+                <span class="hero-badge-icon">F</span>
+                Web Fonts + Local Fonts
+              </span>
+
+              <span class="hero-badge">
+                <span class="hero-badge-icon">A</span>
+                Extensible Tool API
+              </span>
+            </div>
           </div>
 
           <a
@@ -169,51 +451,91 @@
             rel="noopener noreferrer"
           >
             Open Developer Guide
+            <span class="guide-arrow">↗</span>
           </a>
         </div>
 
         <div class="editor-hero-features">
-          <div class="editor-feature-card">
-            <strong>What it includes</strong>
-            <span>Rich text formatting tools and toolbar presets: minimal, basic, full.</span>
+          <div class="editor-feature-card feature-wide">
+            <div class="feature-icon">📘</div>
+            <div class="feature-content">
+              <strong>Developer setup</strong>
+              <span>
+                Docs-style multi-row toolbar with a ruler and draggable left/right page margins.
+                Add a new feature by creating a tool file and importing it in
+                <code>src/mnb-editor.main.js</code>.
+              </span>
+            </div>
           </div>
 
           <div class="editor-feature-card">
-            <strong>Editing modes</strong>
-            <span>Visual editor, HTML code view, and preview mode.</span>
+            <div class="feature-icon">✦</div>
+            <div class="feature-content">
+              <strong>What it includes</strong>
+              <span>Rich text formatting tools and toolbar presets: minimal, basic, full.</span>
+            </div>
           </div>
 
           <div class="editor-feature-card">
-            <strong>Workspace controls</strong>
-            <span>Margin ruler, page layout controls, content limits, counters, and enforcement.</span>
+            <div class="feature-icon">◫</div>
+            <div class="feature-content">
+              <strong>Editing modes</strong>
+              <span>Visual editor, HTML code view, and preview mode.</span>
+            </div>
           </div>
 
           <div class="editor-feature-card">
-            <strong>Advanced tools</strong>
-            <span>Tables, comments, media, embeds, gallery, export, print, themes, and more.</span>
+            <div class="feature-icon">⌁</div>
+            <div class="feature-content">
+              <strong>Workspace controls</strong>
+              <span>Margin ruler, page layout controls, content limits, counters, and enforcement.</span>
+            </div>
           </div>
 
           <div class="editor-feature-card">
-            <strong>Font management</strong>
-            <span>Custom font support via web fonts and uploaded local fonts.</span>
+            <div class="feature-icon">▦</div>
+            <div class="feature-content">
+              <strong>Advanced tools</strong>
+              <span>Tables, comments, media, embeds, gallery, export, print, themes, and more.</span>
+            </div>
           </div>
 
           <div class="editor-feature-card">
-            <strong>Extensible API</strong>
-            <span>Tool extension support with <code>buttonTool(...)</code> and <code>selectTool(...)</code>.</span>
+            <div class="feature-icon">A</div>
+            <div class="feature-content">
+              <strong>Font management</strong>
+              <span>Custom font support via web fonts and uploaded local fonts.</span>
+            </div>
+          </div>
+
+          <div class="editor-feature-card">
+            <div class="feature-icon">⚙</div>
+            <div class="feature-content">
+              <strong>Extensible API</strong>
+              <span>Tool extension support with <code>buttonTool(...)</code> and <code>selectTool(...)</code>.</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div id="editor"></div>
+      <div class="editor-stage">
+        <div id="editor"></div>
+      </div>
 
       <div class="editor-bottom-panel">
-        <h3>Editor Options</h3>
+        <div class="editor-bottom-head">
+          <div>
+            <h3>Editor Options</h3>
+            <p>Inspect the editor instance, generated HTML, and plain text output.</p>
+          </div>
+        </div>
+
         <div class="editor-bottom-actions">
           <button type="button" id="getEditorBtn">Get Editor</button>
           <button type="button" id="getHtmlBtn">Get HTML</button>
           <button type="button" id="getTextBtn">Get Text</button>
         </div>
+
         <pre id="editorOutput">Click a button to inspect editor data.</pre>
       </div>
     </div>
