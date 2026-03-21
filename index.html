@@ -2,10 +2,91 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>MNB Editor Rebuild v6</title>
+    <title>MNB Editor</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="./mnb-editor.css" />
     <style>
+      .editor-hero {
+        margin-bottom: 18px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      }
+
+      .editor-hero-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+
+      .editor-hero-title-wrap h2 {
+        margin: 0 0 8px;
+        font-size: 26px;
+        line-height: 1.2;
+        color: #0f172a;
+      }
+
+      .editor-hero-title-wrap p {
+        margin: 0;
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.7;
+        max-width: 920px;
+      }
+
+      .editor-guide-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+      }
+
+      .editor-guide-link:hover {
+        opacity: 0.96;
+      }
+
+      .editor-hero-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .editor-feature-card {
+        padding: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .editor-feature-card strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+        color: #0f172a;
+      }
+
+      .editor-feature-card span {
+        display: block;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
       .editor-bottom-panel {
         margin-top: 18px;
         padding: 16px;
@@ -62,12 +143,66 @@
   <body>
     <div style="max-width:1400px;margin:30px auto;padding:0 16px;">
       <div style="margin-bottom:18px;">
-        <h1 style="margin:0 0 8px;">MNB Editor Rebuild v6</h1>
+        <h1 style="margin:0 0 8px;">MNB Editor</h1>
         <p style="margin:0;color:#64748b;">
           Docs-style multi-row toolbar with a ruler and draggable left/right
           page margins. Add a new feature by creating a tool file and importing
           it in <code>src/mnb-editor.main.js</code>.
         </p>
+      </div>
+
+      <div class="editor-hero">
+        <div class="editor-hero-top">
+          <div class="editor-hero-title-wrap">
+            <h2>MNBEditor</h2>
+            <p>
+              A browser-based rich text editor with a document-style workspace,
+              configurable toolbars, visual/code/preview modes, font management,
+              page ruler controls, alerts, modal forms, and an extensible tool system.
+            </p>
+          </div>
+
+          <a
+            class="editor-guide-link"
+            href="./MNBEditor_Guide.html"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open Developer Guide
+          </a>
+        </div>
+
+        <div class="editor-hero-features">
+          <div class="editor-feature-card">
+            <strong>What it includes</strong>
+            <span>Rich text formatting tools and toolbar presets: minimal, basic, full.</span>
+          </div>
+
+          <div class="editor-feature-card">
+            <strong>Editing modes</strong>
+            <span>Visual editor, HTML code view, and preview mode.</span>
+          </div>
+
+          <div class="editor-feature-card">
+            <strong>Workspace controls</strong>
+            <span>Margin ruler, page layout controls, content limits, counters, and enforcement.</span>
+          </div>
+
+          <div class="editor-feature-card">
+            <strong>Advanced tools</strong>
+            <span>Tables, comments, media, embeds, gallery, export, print, themes, and more.</span>
+          </div>
+
+          <div class="editor-feature-card">
+            <strong>Font management</strong>
+            <span>Custom font support via web fonts and uploaded local fonts.</span>
+          </div>
+
+          <div class="editor-feature-card">
+            <strong>Extensible API</strong>
+            <span>Tool extension support with <code>buttonTool(...)</code> and <code>selectTool(...)</code>.</span>
+          </div>
+        </div>
       </div>
 
       <div id="editor"></div>
@@ -98,7 +233,6 @@
           mode: 'hard',
           showCounter: true
         },
-       
       });
 
       const output = document.getElementById('editorOutput');
