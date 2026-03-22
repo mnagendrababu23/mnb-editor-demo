@@ -97,6 +97,8 @@ body{
   background: #ffffff;
   border-bottom:1px solid var(--mnb-toolbar-divider);
   backdrop-filter:none;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
 }
 
 .mnb-editor-shell.theme-dark .mnb-editor-topbar,

@@ -66,6 +66,7 @@ import tool_63_code_sprint from './tools/63-code-sprint.js';
 import tool_64_export from './tools/64-export.js';
 import tool_65_languages from './tools/65-languages.js';
 import tool_66_print from './tools/66-print.js';
+import tool_67_ai_integration from './tools/67-ai-integration.js';
 
 const RAW_TOOLS = [
   tool_01_undo,
@@ -134,6 +135,7 @@ const RAW_TOOLS = [
   tool_64_export,
   tool_65_languages,
   tool_66_print,
+  tool_67_ai_integration,
 ];
 
 const TOOL_META = {
@@ -613,6 +615,13 @@ const TOOL_META = {
     icon: '🌐',
     toolbarLabel: 'Language',
   },
+  'ai-integration': {
+    group: 'row-4-group-1',
+    groupLabel: 'AI',
+    area: 'top',
+    icon: '🤖',
+    toolbarLabel: 'AI',
+  },
 };
 
 const TOOL_ID_ORDER = [
@@ -664,7 +673,6 @@ const TOOL_ID_ORDER = [
   'link',
   'horizontal-line',
 
-
   'elements',
   'layout',
   'gallery',
@@ -678,6 +686,7 @@ const TOOL_ID_ORDER = [
   'word-count',
   'print',
   'export',
+  'ai-integration',
 ];
 
 const normalizeToolId = (value = '') =>
@@ -811,6 +820,10 @@ const TOOL_ALIASES = {
 
   'export': 'export',
   'print': 'print',
+
+  'ai': 'ai-integration',
+  'ai-integration': 'ai-integration',
+  'aiintegration': 'ai-integration',
 };
 
 function resolveToolId(tool) {
@@ -871,49 +884,50 @@ const TOOLBAR_PRESETS = {
     'export',
   ],
   basic: [
-    'margin-ruler',
+  'margin-ruler',
 
-    'undo',
-    'redo',
-    'logs',
+  'undo',
+  'redo',
+  'logs',
 
-    'block-styles',
-    'font-family',
-    'font-sizes',
-    'line-height',
-    'font-spacing',
-    'space-before',
-    'space-after',
+  'block-styles',
+  'font-family',
+  'font-sizes',
+  'line-height',
+  'font-spacing',
+  'space-before',
+  'space-after',
 
-    'bold',
-    'italic',
-    'underline',
-    'strikethrough',
-    'font-color',
-    'text-highlight',
-    'remove-format',
+  'bold',
+  'italic',
+  'underline',
+  'strikethrough',
+  'font-color',
+  'text-highlight',
+  'remove-format',
 
-    'list',
-    'sub-list',
-    'align-left',
-    'align-center',
-    'align-right',
-    'justify',
-    'decrease-indent',
-    'increase-indent',
+  'list',
+  'sub-list',
+  'align-left',
+  'align-center',
+  'align-right',
+  'justify',
+  'decrease-indent',
+  'increase-indent',
 
-    'table',
-    'image',
-    'link',
+  'table',
+  'image',
+  'link',
 
-    'find-replace',
-    'comments',
-    'preview',
-    'view-code',
-    'full-screen',
-    'print',
-    'export',
-  ],
+  'find-replace',
+  'comments',
+  'preview',
+  'view-code',
+  'full-screen',
+  'print',
+  'export',
+  'ai-integration',
+],
   full: [
     'margin-ruler',
     ...FULL_TOOL_IDS,

@@ -20,14 +20,15 @@ export async function chooseColor(editor, title, defaultColor = '#111827') {
 }
 
 export function simpleStyleOptions(list) {
-  return list.map((item) => typeof item === 'string' ? { label: item, value: item } : item);
+  return list.map((item) => (
+    typeof item === 'string' ? { label: item, value: item } : item
+  ));
 }
 
 function normalizeHexColor(value, fallback = '#111827') {
   const input = String(value || '').trim();
 
   if (/^#[0-9a-fA-F]{6}$/.test(input)) return input.toLowerCase();
-
   if (/^[0-9a-fA-F]{6}$/.test(input)) return `#${input.toLowerCase()}`;
 
   if (/^#[0-9a-fA-F]{3}$/.test(input)) {
@@ -51,7 +52,9 @@ function readRecentColors(storageKey) {
   try {
     const raw = localStorage.getItem(storageKey);
     const parsed = JSON.parse(raw || '[]');
-    return Array.isArray(parsed) ? parsed.filter((v) => /^#[0-9a-fA-F]{6}$/.test(v)) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((v) => /^#[0-9a-fA-F]{6}$/.test(v))
+      : [];
   } catch {
     return [];
   }
@@ -95,6 +98,7 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
 
   header.textContent = title;
 
+  menu.innerHTML = '';
   menu.style.minWidth = '240px';
   menu.style.padding = '10px';
   menu.style.borderRadius = '12px';
@@ -104,7 +108,13 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
   list.style.flexDirection = 'column';
   list.style.gap = '10px';
 
-  let selectedColor = normalizeHexColor(tool.value || defaultValue, normalizeHexColor(defaultValue));
+  menu.appendChild(header);
+  menu.appendChild(list);
+
+  let selectedColor = normalizeHexColor(
+    tool.value || defaultValue,
+    normalizeHexColor(defaultValue)
+  );
 
   const previewRow = document.createElement('div');
   previewRow.style.display = 'flex';
@@ -134,10 +144,55 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
   previewRow.appendChild(previewSwatch);
   previewRow.appendChild(hexInput);
 
+  const paletteWrap = document.createElement('div');
+  paletteWrap.style.display = 'grid';
+  paletteWrap.style.gridTemplateColumns = `repeat(${columns}, 32px)`;
+  paletteWrap.style.gap = '6px';
+  paletteWrap.style.justifyContent = 'start';
+
+  const footer = document.createElement('div');
+  footer.style.display = 'flex';
+  footer.style.alignItems = 'center';
+  footer.style.justifyContent = 'space-between';
+  footer.style.gap = '8px';
+  footer.style.flexWrap = 'wrap';
+
+  const leftActions = document.createElement('div');
+  leftActions.style.display = 'flex';
+  leftActions.style.alignItems = 'center';
+  leftActions.style.gap = '8px';
+
+  const rightActions = document.createElement('div');
+  rightActions.style.display = 'flex';
+  rightActions.style.alignItems = 'center';
+  rightActions.style.gap = '8px';
+
+  const pickerLabel = document.createElement('label');
+  pickerLabel.style.display = 'inline-flex';
+  pickerLabel.style.alignItems = 'center';
+  pickerLabel.style.gap = '8px';
+  pickerLabel.style.padding = '7px 10px';
+  pickerLabel.style.borderRadius = '8px';
+  pickerLabel.style.border = '1px solid rgba(15,23,42,.12)';
+  pickerLabel.style.background = '#fff';
+  pickerLabel.style.cursor = 'pointer';
+  pickerLabel.textContent = 'Picker';
+
+  const picker = document.createElement('input');
+  picker.type = 'color';
+  picker.value = selectedColor;
+  picker.style.width = '20px';
+  picker.style.height = '20px';
+  picker.style.padding = '0';
+  picker.style.border = '0';
+  picker.style.background = 'transparent';
+  picker.style.cursor = 'pointer';
+
   const syncPreview = (value) => {
     selectedColor = normalizeHexColor(value, selectedColor);
     previewSwatch.style.background = selectedColor;
     hexInput.value = selectedColor;
+    picker.value = selectedColor;
   };
 
   hexInput.addEventListener('blur', () => {
@@ -148,6 +203,7 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
     if (event.key !== 'Enter') return;
     event.preventDefault();
     syncPreview(hexInput.value);
+
     try {
       await applyValue(selectedColor, selectedColor);
       pushRecentColor(recentStorageKey, selectedColor);
@@ -155,12 +211,6 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
       close();
     }
   });
-
-  const paletteWrap = document.createElement('div');
-  paletteWrap.style.display = 'grid';
-  paletteWrap.style.gridTemplateColumns = `repeat(${columns}, 32px)`;
-  paletteWrap.style.gap = '6px';
-  paletteWrap.style.justifyContent = 'start';
 
   const renderSwatchButton = (color, active = false) => {
     const swatch = document.createElement('button');
@@ -178,6 +228,7 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
 
     swatch.addEventListener('click', async () => {
       syncPreview(color);
+
       try {
         await applyValue(color, color);
         pushRecentColor(recentStorageKey, color);
@@ -197,7 +248,9 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
 
   const recentColors = readRecentColors(recentStorageKey);
 
-  let recentWrap = null;
+  list.appendChild(previewRow);
+  list.appendChild(paletteWrap);
+
   if (recentColors.length) {
     const recentSection = document.createElement('div');
     recentSection.style.display = 'flex';
@@ -210,7 +263,7 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
     recentLabel.style.fontWeight = '600';
     recentLabel.style.color = '#475569';
 
-    recentWrap = document.createElement('div');
+    const recentWrap = document.createElement('div');
     recentWrap.style.display = 'grid';
     recentWrap.style.gridTemplateColumns = `repeat(${columns}, 32px)`;
     recentWrap.style.gap = '6px';
@@ -224,23 +277,6 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
     recentSection.appendChild(recentWrap);
     list.appendChild(recentSection);
   }
-
-  const footer = document.createElement('div');
-  footer.style.display = 'flex';
-  footer.style.alignItems = 'center';
-  footer.style.justifyContent = 'space-between';
-  footer.style.gap = '8px';
-  footer.style.flexWrap = 'wrap';
-
-  const leftActions = document.createElement('div');
-  leftActions.style.display = 'flex';
-  leftActions.style.alignItems = 'center';
-  leftActions.style.gap = '8px';
-
-  const rightActions = document.createElement('div');
-  rightActions.style.display = 'flex';
-  rightActions.style.alignItems = 'center';
-  rightActions.style.gap = '8px';
 
   if (allowAuto) {
     const autoBtn = document.createElement('button');
@@ -264,27 +300,6 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
     leftActions.appendChild(autoBtn);
   }
 
-  const pickerLabel = document.createElement('label');
-  pickerLabel.style.display = 'inline-flex';
-  pickerLabel.style.alignItems = 'center';
-  pickerLabel.style.gap = '8px';
-  pickerLabel.style.padding = '7px 10px';
-  pickerLabel.style.borderRadius = '8px';
-  pickerLabel.style.border = '1px solid rgba(15,23,42,.12)';
-  pickerLabel.style.background = '#fff';
-  pickerLabel.style.cursor = 'pointer';
-  pickerLabel.textContent = 'Picker';
-
-  const picker = document.createElement('input');
-  picker.type = 'color';
-  picker.value = selectedColor;
-  picker.style.width = '20px';
-  picker.style.height = '20px';
-  picker.style.padding = '0';
-  picker.style.border = '0';
-  picker.style.background = 'transparent';
-  picker.style.cursor = 'pointer';
-
   picker.addEventListener('input', (event) => {
     syncPreview(event.target.value);
   });
@@ -303,6 +318,7 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
 
   applyBtn.addEventListener('click', async () => {
     syncPreview(hexInput.value);
+
     try {
       await applyValue(selectedColor, selectedColor);
       pushRecentColor(recentStorageKey, selectedColor);
@@ -317,7 +333,5 @@ export function renderColorPickerMenu(editor, ctx, config = {}) {
   footer.appendChild(leftActions);
   footer.appendChild(rightActions);
 
-  list.appendChild(previewRow);
-  list.appendChild(paletteWrap);
   list.appendChild(footer);
 }

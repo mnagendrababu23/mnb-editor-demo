@@ -518,9 +518,7 @@
         </div>
       </div>
 
-      <div class="editor-stage">
-        <div id="editor"></div>
-      </div>
+      <div id="editor"></div>
 
       <div class="editor-bottom-panel">
         <div class="editor-bottom-head">
@@ -543,7 +541,7 @@
     <script type="module">
       import { mountMNBEditor } from './src/mnb-editor.main.js';
 
-      const editor = mountMNBEditor('#editor', {
+      /*const editor = mountMNBEditor('#editor', {
         theme: 'light',
         height: '500px',
         toolbarCollapsible: true,
@@ -555,6 +553,7 @@
           mode: 'hard',
           showCounter: true
         },
+       
       });
 
       const output = document.getElementById('editorOutput');

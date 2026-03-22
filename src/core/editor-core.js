@@ -863,21 +863,29 @@ export class MNBEditor {
 
   positionTooltip(anchor, tip) {
     const rect = anchor.getBoundingClientRect();
+    const hostRect = this.tooltipHost?.getBoundingClientRect() || {
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
     tip.style.left = '0px';
     tip.style.top = '0px';
 
     requestAnimationFrame(() => {
       const width = tip.offsetWidth;
       const height = tip.offsetHeight;
-      let left = rect.left + (rect.width / 2) - (width / 2);
-      let top = rect.bottom + 12;
 
-      if (top + height > window.innerHeight - 12) {
-        top = rect.top - height - 12;
+      let left = (rect.left - hostRect.left) + (rect.width / 2) - (width / 2);
+      let top = (rect.bottom - hostRect.top) + 12;
+
+      if (top + height > hostRect.height - 12) {
+        top = (rect.top - hostRect.top) - height - 12;
       }
 
-      left = Math.min(Math.max(12, left), window.innerWidth - width - 12);
-      top = Math.min(Math.max(12, top), window.innerHeight - height - 12);
+      left = Math.min(Math.max(12, left), hostRect.width - width - 12);
+      top = Math.min(Math.max(12, top), hostRect.height - height - 12);
 
       tip.style.left = `${left}px`;
       tip.style.top = `${top}px`;
@@ -898,237 +906,198 @@ export class MNBEditor {
     this.activeTooltipAnchor = null;
   }
 
- toggleToolMenu(anchor, tool) {
-  if (this.activePopoverAnchor === anchor) {
-    this.closeToolMenu();
-    return;
-  }
-
-  this.hideTooltipNow();
-  this.closeToolMenu();
-
-  const menu = document.createElement('div');
-  menu.className = 'mnb-tool-popover';
-  menu.dataset.area = tool.area || 'top';
-
-  const columns = Math.max(1, Number(tool.menuColumns) || 1);
-  const iconOnlyMenu = Boolean(tool.iconOnlyMenu);
-  const iconGridMenu = iconOnlyMenu && columns > 1;
-
-  menu.dataset.columns = String(columns);
-  if (iconGridMenu) {
-    menu.dataset.iconOnlyMenu = 'true';
-  }
-
-  const header = document.createElement('div');
-  header.className = 'mnb-tool-popover-head';
-  header.textContent = tool.title || tool.label || tool.toolbarLabel || tool.id;
-
-  const list = document.createElement('div');
-  list.className = 'mnb-tool-popover-list';
-
-  if (columns > 1) {
-    list.style.display = 'grid';
-    list.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
-    list.style.gap = '8px';
-    list.style.alignItems = 'stretch';
-  }
-
-  const mountMenu = () => {
-    if (!menu.isConnected) {
-      this.popoverHost.appendChild(menu);
-    }
-
-    this.activePopover = menu;
-    this.activePopoverAnchor = anchor;
-    anchor.classList.add('is-open');
-    this.positionToolMenu(anchor, menu, tool.area || 'top');
-  };
-
-  const syncToolValue = (nextValue, fallbackValue = '') => {
-    const resolved =
-      nextValue == null || nextValue === ''
-        ? fallbackValue
-        : nextValue;
-
-    const displayValue =
-      resolved && typeof resolved === 'object' && resolved.type
-        ? resolved.type
-        : resolved;
-
-    if (displayValue != null && displayValue !== '') {
-      tool.value = displayValue;
-    }
-
-    this.updateToolButtonState(tool, anchor);
-    return tool.value;
-  };
-
-  const applyValue = async (runValue, displayValue = runValue) => {
-    const nextValue = await this.executeTool(tool.id, runValue);
-    return syncToolValue(nextValue, displayValue);
-  };
-
-  const execute = async (runValue) => {
-    const nextValue = await this.executeTool(tool.id, runValue);
-    return syncToolValue(nextValue, runValue);
-  };
-
-  if (typeof tool.renderMenu === 'function') {
-    menu.classList.add('mnb-tool-popover-custom');
-
-    try {
-      const handled = tool.renderMenu(this, {
-        tool,
-        menu,
-        header,
-        list,
-        anchor,
-        columns,
-        iconOnlyMenu,
-        iconGridMenu,
-        applyValue,
-        execute,
-        setValue: (value) => syncToolValue(value, value),
-        close: () => this.closeToolMenu(),
-      });
-
-      if (handled !== false) {
-        mountMenu();
-        return;
-      }
-    } catch (error) {
-      this.handleError(error, tool.id);
+  toggleToolMenu(anchor, tool) {
+    if (this.activePopoverAnchor === anchor) {
       this.closeToolMenu();
       return;
     }
-  }
 
-  menu.appendChild(header);
-  menu.appendChild(list);
+    this.hideTooltipNow();
+    this.closeToolMenu();
 
-  const menuOptions =
-    Array.isArray(tool.options) ? tool.options :
-    Array.isArray(tool.items) ? tool.items :
-    Array.isArray(tool.choices) ? tool.choices :
-    [];
+    const menu = document.createElement('div');
+    menu.className = 'mnb-tool-popover';
+    menu.dataset.area = tool.area || 'top';
 
-  menuOptions.forEach((option) => {
-    const item = typeof option === 'string' ? { label: option, value: option } : option;
+    const columns = Math.max(1, Number(tool.menuColumns) || 1);
+    const iconOnlyMenu = Boolean(tool.iconOnlyMenu);
+    const iconGridMenu = iconOnlyMenu && columns > 1;
 
-    const opt = document.createElement('button');
-    opt.type = 'button';
-    opt.className = 'mnb-tool-popover-option';
-    opt.textContent = item.label ?? item.value ?? '';
-
+    menu.dataset.columns = String(columns);
     if (iconGridMenu) {
-      opt.title = item.label ?? item.value ?? '';
-      opt.setAttribute('aria-label', item.label ?? item.value ?? '');
-      opt.style.display = 'inline-flex';
-      opt.style.alignItems = 'center';
-      opt.style.justifyContent = 'center';
-      opt.style.width = '44px';
-      opt.style.minWidth = '44px';
-      opt.style.height = '44px';
-      opt.style.minHeight = '44px';
-      opt.style.padding = '0';
-      opt.style.textAlign = 'center';
-      opt.style.lineHeight = '1';
-    } else {
-      opt.style.width = '100%';
-      opt.style.minWidth = 'unset';
-      opt.style.height = 'auto';
-      opt.style.minHeight = '38px';
-      opt.style.padding = '10px 12px';
-      opt.style.textAlign = 'left';
+      menu.dataset.iconOnlyMenu = 'true';
     }
 
-    if (item.style && typeof item.style === 'object') {
-      Object.assign(opt.style, item.style);
+    const header = document.createElement('div');
+    header.className = 'mnb-tool-popover-head';
+    header.textContent = tool.title || tool.label || tool.toolbarLabel || tool.id;
+
+    const list = document.createElement('div');
+    list.className = 'mnb-tool-popover-list';
+
+    if (columns > 1) {
+      list.style.display = 'grid';
+      list.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+      list.style.gap = '8px';
+      list.style.alignItems = 'stretch';
     }
 
-    if (tool.value === item.value) {
-      opt.classList.add('is-active');
-    }
+    const mountMenu = () => {
+      if (!menu.isConnected) {
+        this.popoverHost.appendChild(menu);
+      }
 
-    opt.addEventListener('click', async () => {
+      this.activePopover = menu;
+      this.activePopoverAnchor = anchor;
+      anchor.classList.add('is-open');
+      this.positionToolMenu(anchor, menu, tool.area || 'top');
+    };
+
+    const syncToolValue = (nextValue, fallbackValue = '') => {
+      const resolved =
+        nextValue == null || nextValue === ''
+          ? fallbackValue
+          : nextValue;
+
+      const displayValue =
+        resolved && typeof resolved === 'object' && resolved.type
+          ? resolved.type
+          : resolved;
+
+      if (displayValue != null && displayValue !== '') {
+        tool.value = displayValue;
+      }
+
+      this.updateToolButtonState(tool, anchor);
+      return tool.value;
+    };
+
+    const applyValue = async (runValue, displayValue = runValue) => {
+      const nextValue = await this.executeTool(tool.id, runValue);
+      return syncToolValue(nextValue, displayValue);
+    };
+
+    const execute = async (runValue) => {
+      const nextValue = await this.executeTool(tool.id, runValue);
+      return syncToolValue(nextValue, runValue);
+    };
+
+    if (typeof tool.renderMenu === 'function') {
+      menu.classList.add('mnb-tool-popover-custom');
+
       try {
-        await applyValue(item.value, item.value);
+        const handled = tool.renderMenu(this, {
+          tool,
+          menu,
+          header,
+          list,
+          anchor,
+          columns,
+          iconOnlyMenu,
+          iconGridMenu,
+          applyValue,
+          execute,
+          setValue: (value) => syncToolValue(value, value),
+          close: () => this.closeToolMenu(),
+        });
+
+        if (handled !== false) {
+          mountMenu();
+          return;
+        }
       } catch (error) {
         this.handleError(error, tool.id);
-      } finally {
         this.closeToolMenu();
+        return;
       }
+    }
+
+    menu.appendChild(header);
+    menu.appendChild(list);
+
+    const menuOptions =
+      Array.isArray(tool.options) ? tool.options :
+        Array.isArray(tool.items) ? tool.items :
+          Array.isArray(tool.choices) ? tool.choices :
+            [];
+
+    menuOptions.forEach((option) => {
+      const item = typeof option === 'string' ? { label: option, value: option } : option;
+
+      const opt = document.createElement('button');
+      opt.type = 'button';
+      opt.className = 'mnb-tool-popover-option';
+      opt.textContent = item.label ?? item.value ?? '';
+
+      if (iconGridMenu) {
+        opt.title = item.label ?? item.value ?? '';
+        opt.setAttribute('aria-label', item.label ?? item.value ?? '');
+        opt.style.display = 'inline-flex';
+        opt.style.alignItems = 'center';
+        opt.style.justifyContent = 'center';
+        opt.style.width = '44px';
+        opt.style.minWidth = '44px';
+        opt.style.height = '44px';
+        opt.style.minHeight = '44px';
+        opt.style.padding = '0';
+        opt.style.textAlign = 'center';
+        opt.style.lineHeight = '1';
+      } else {
+        opt.style.width = '100%';
+        opt.style.minWidth = 'unset';
+        opt.style.height = 'auto';
+        opt.style.minHeight = '38px';
+        opt.style.padding = '10px 12px';
+        opt.style.textAlign = 'left';
+      }
+
+      if (item.style && typeof item.style === 'object') {
+        Object.assign(opt.style, item.style);
+      }
+
+      if (tool.value === item.value) {
+        opt.classList.add('is-active');
+      }
+
+      opt.addEventListener('click', async () => {
+        try {
+          await applyValue(item.value, item.value);
+        } catch (error) {
+          this.handleError(error, tool.id);
+        } finally {
+          this.closeToolMenu();
+        }
+      });
+
+      list.appendChild(opt);
     });
 
-    list.appendChild(opt);
-  });
-
-  mountMenu();
-}
-
-positionToolMenu(anchor, menu, area = 'top') {
-  const rect = anchor.getBoundingClientRect();
-  menu.style.left = '0px';
-  menu.style.top = '0px';
-
-  requestAnimationFrame(() => {
-    const viewportPad = 12;
-    const gap = 10;
-    const availableHeight = Math.max(220, window.innerHeight - (viewportPad * 2));
-
-    menu.style.maxHeight = `${availableHeight}px`;
-    menu.style.overflowY = 'auto';
-    menu.style.overflowX = 'hidden';
-
-    const popRect = menu.getBoundingClientRect();
-
-    let left = rect.left;
-    if (left + popRect.width > window.innerWidth - viewportPad) {
-      left = window.innerWidth - popRect.width - viewportPad;
-    }
-    left = Math.max(viewportPad, left);
-
-    const spaceBelow = window.innerHeight - rect.bottom - gap - viewportPad;
-    const spaceAbove = rect.top - gap - viewportPad;
-
-    const fitsBelow = popRect.height <= spaceBelow;
-    const fitsAbove = popRect.height <= spaceAbove;
-
-    let top;
-    if (fitsBelow || (!fitsAbove && spaceBelow >= spaceAbove)) {
-      top = rect.bottom + gap;
-    } else {
-      top = rect.top - popRect.height - gap;
-    }
-
-    const maxTop = window.innerHeight - popRect.height - viewportPad;
-    top = Math.max(viewportPad, Math.min(top, maxTop));
-
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
-  });
-}
+    mountMenu();
+  }
 
   positionToolMenu(anchor, menu, area = 'top') {
     const rect = anchor.getBoundingClientRect();
+    const hostRect = this.popoverHost?.getBoundingClientRect() || {
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
     menu.style.left = '0px';
     menu.style.top = '0px';
 
     requestAnimationFrame(() => {
       const popRect = menu.getBoundingClientRect();
-      let left = rect.left;
-      let top = rect.bottom + 10;
 
-      const maxLeft = window.innerWidth - popRect.width - 12;
-      const maxTop = window.innerHeight - popRect.height - 12;
+      let left = rect.left - hostRect.left;
+      let top = rect.bottom - hostRect.top + 10;
 
-      if (left > maxLeft) {
-        left = maxLeft;
-      }
-      if (top > maxTop) {
-        top = rect.top - popRect.height - 10;
-      }
+      const maxLeft = hostRect.width - popRect.width - 12;
+      const maxTop = hostRect.height - popRect.height - 12;
+
+      if (left > maxLeft) left = maxLeft;
+      if (top > maxTop) top = rect.top - hostRect.top - popRect.height - 10;
 
       menu.style.left = `${Math.max(12, left)}px`;
       menu.style.top = `${Math.max(12, top)}px`;
@@ -1688,8 +1657,8 @@ positionToolMenu(anchor, menu, area = 'top') {
           if (row.hidden) {
             values[field.name] =
               field.type === 'checkbox' ? false :
-              field.type === 'file' ? (field.multiple ? [] : null) :
-              '';
+                field.type === 'file' ? (field.multiple ? [] : null) :
+                  '';
             return;
           }
           values[field.name] = getInputValue(field, input);
@@ -1972,139 +1941,139 @@ positionToolMenu(anchor, menu, area = 'top') {
   }
 
   toggleFullscreen() {
-  const root = this.root;
-  if (!root) return;
+    const root = this.root;
+    if (!root) return;
 
-  const frame =
-    root.querySelector('.mnb-editor-frame') ||
-    root.querySelector('.mnb-editor-frame-docs');
+    const frame =
+      root.querySelector('.mnb-editor-frame') ||
+      root.querySelector('.mnb-editor-frame-docs');
 
-  const main =
-    root.querySelector('.mnb-editor-main') ||
-    frame;
+    const main =
+      root.querySelector('.mnb-editor-main') ||
+      frame;
 
-  const topbar =
-    root.querySelector('.mnb-editor-topbar') ||
-    root.querySelector('.mnb-editor-topbar-docs');
+    const topbar =
+      root.querySelector('.mnb-editor-topbar') ||
+      root.querySelector('.mnb-editor-topbar-docs');
 
-  const rulerBar = root.querySelector('.mnb-editor-rulerbar');
-  const body = root.querySelector('.mnb-editor-body');
-  const statusbar = root.querySelector('.mnb-statusbar');
+    const rulerBar = root.querySelector('.mnb-editor-rulerbar');
+    const body = root.querySelector('.mnb-editor-body');
+    const statusbar = root.querySelector('.mnb-statusbar');
 
-  const readInlineStyle = (node) => {
-    if (!node) return null;
-    return node.getAttribute('style') || '';
-  };
-
-  const restoreInlineStyle = (node, styleText) => {
-    if (!node) return;
-    if (styleText) node.setAttribute('style', styleText);
-    else node.removeAttribute('style');
-  };
-
-  const entering = !root.classList.contains('is-fullscreen');
-
-  if (entering) {
-    this.__mnbFullscreenState = {
-      bodyOverflow: document.body.style.overflow || '',
-      root: readInlineStyle(root),
-      frame: readInlineStyle(frame),
-      main: readInlineStyle(main),
-      topbar: readInlineStyle(topbar),
-      rulerBar: readInlineStyle(rulerBar),
-      body: readInlineStyle(body),
-      statusbar: readInlineStyle(statusbar),
+    const readInlineStyle = (node) => {
+      if (!node) return null;
+      return node.getAttribute('style') || '';
     };
 
-    root.classList.add('is-fullscreen');
-    document.body.style.overflow = 'hidden';
+    const restoreInlineStyle = (node, styleText) => {
+      if (!node) return;
+      if (styleText) node.setAttribute('style', styleText);
+      else node.removeAttribute('style');
+    };
 
-    Object.assign(root.style, {
-      position: 'fixed',
-      inset: '0',
-      zIndex: '9999',
-      width: '100vw',
-      maxWidth: '100vw',
-      height: '100vh',
-      maxHeight: '100vh',
-      margin: '0',
-      borderRadius: '0',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-    });
+    const entering = !root.classList.contains('is-fullscreen');
 
-    if (frame) {
-      Object.assign(frame.style, {
+    if (entering) {
+      this.__mnbFullscreenState = {
+        bodyOverflow: document.body.style.overflow || '',
+        root: readInlineStyle(root),
+        frame: readInlineStyle(frame),
+        main: readInlineStyle(main),
+        topbar: readInlineStyle(topbar),
+        rulerBar: readInlineStyle(rulerBar),
+        body: readInlineStyle(body),
+        statusbar: readInlineStyle(statusbar),
+      };
+
+      root.classList.add('is-fullscreen');
+      document.body.style.overflow = 'hidden';
+
+      Object.assign(root.style, {
+        position: 'fixed',
+        inset: '0',
+        zIndex: '9999',
+        width: '100vw',
+        maxWidth: '100vw',
+        height: '100vh',
+        maxHeight: '100vh',
+        margin: '0',
+        borderRadius: '0',
         display: 'flex',
         flexDirection: 'column',
-        flex: '1 1 auto',
-        minHeight: '0',
-        height: '100%',
         overflow: 'hidden',
       });
+
+      if (frame) {
+        Object.assign(frame.style, {
+          display: 'flex',
+          flexDirection: 'column',
+          flex: '1 1 auto',
+          minHeight: '0',
+          height: '100%',
+          overflow: 'hidden',
+        });
+      }
+
+      if (main) {
+        Object.assign(main.style, {
+          display: 'flex',
+          flexDirection: 'column',
+          flex: '1 1 auto',
+          minHeight: '0',
+          height: '100%',
+          overflow: 'hidden',
+        });
+      }
+
+      if (topbar) {
+        topbar.style.flex = '0 0 auto';
+      }
+
+      if (rulerBar) {
+        rulerBar.style.flex = '0 0 auto';
+      }
+
+      if (body) {
+        Object.assign(body.style, {
+          flex: '1 1 auto',
+          minHeight: '0',
+          height: 'auto',
+          overflow: 'auto',
+        });
+      }
+
+      if (statusbar) {
+        Object.assign(statusbar.style, {
+          flex: '0 0 auto',
+          marginTop: 'auto',
+        });
+      }
+
+      this.closeToolMenu?.();
+      this.hideTooltipNow?.();
+      window.dispatchEvent(new Event('resize'));
+      this.alert('Fullscreen enabled.', 'success');
+      return;
     }
 
-    if (main) {
-      Object.assign(main.style, {
-        display: 'flex',
-        flexDirection: 'column',
-        flex: '1 1 auto',
-        minHeight: '0',
-        height: '100%',
-        overflow: 'hidden',
-      });
-    }
+    root.classList.remove('is-fullscreen');
 
-    if (topbar) {
-      topbar.style.flex = '0 0 auto';
-    }
+    const state = this.__mnbFullscreenState || {};
+    document.body.style.overflow = state.bodyOverflow || '';
 
-    if (rulerBar) {
-      rulerBar.style.flex = '0 0 auto';
-    }
+    restoreInlineStyle(root, state.root);
+    restoreInlineStyle(frame, state.frame);
+    restoreInlineStyle(main, state.main);
+    restoreInlineStyle(topbar, state.topbar);
+    restoreInlineStyle(rulerBar, state.rulerBar);
+    restoreInlineStyle(body, state.body);
+    restoreInlineStyle(statusbar, state.statusbar);
 
-    if (body) {
-      Object.assign(body.style, {
-        flex: '1 1 auto',
-        minHeight: '0',
-        height: 'auto',
-        overflow: 'auto',
-      });
-    }
+    delete this.__mnbFullscreenState;
 
-    if (statusbar) {
-      Object.assign(statusbar.style, {
-        flex: '0 0 auto',
-        marginTop: 'auto',
-      });
-    }
-
-    this.closeToolMenu?.();
-    this.hideTooltipNow?.();
     window.dispatchEvent(new Event('resize'));
-    this.alert('Fullscreen enabled.', 'success');
-    return;
+    this.alert('Fullscreen disabled.', 'success');
   }
-
-  root.classList.remove('is-fullscreen');
-
-  const state = this.__mnbFullscreenState || {};
-  document.body.style.overflow = state.bodyOverflow || '';
-
-  restoreInlineStyle(root, state.root);
-  restoreInlineStyle(frame, state.frame);
-  restoreInlineStyle(main, state.main);
-  restoreInlineStyle(topbar, state.topbar);
-  restoreInlineStyle(rulerBar, state.rulerBar);
-  restoreInlineStyle(body, state.body);
-  restoreInlineStyle(statusbar, state.statusbar);
-
-  delete this.__mnbFullscreenState;
-
-  window.dispatchEvent(new Event('resize'));
-  this.alert('Fullscreen disabled.', 'success');
-}
 
   setTheme(theme) {
     this.root.classList.remove('theme-light', 'theme-dark');
