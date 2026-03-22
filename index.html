@@ -518,7 +518,9 @@
         </div>
       </div>
 
-      <div id="editor"></div>
+      <div class="">
+        <div id="editor"></div>
+      </div>
 
       <div class="editor-bottom-panel">
         <div class="editor-bottom-head">
@@ -553,8 +555,38 @@
           mode: 'hard',
           showCounter: true
         },
-       
-      });
+      });*/
+
+        const editor = mountMNBEditor('#editor', {
+          theme: 'light',
+          height: '700px',
+          toolbarCollapsible: true,
+          collapseToolbarBelow: 9999,
+          collapsedToolbarRows: 2,
+          contentLimit: {
+            max: 500,
+            type: 'chars',
+            mode: 'hard',
+            showCounter: true
+          },
+
+          ai: {
+            endpoint: '',
+            defaultProvider: 'openai',
+            defaultAction: 'improve',
+            defaultApplyMode: 'replace-selection',
+            includeDocumentDefault: false,
+            providers: [
+              { label: 'Anthropic', value: 'anthropic' },
+              { label: 'OpenAI', value: 'openai' },
+              { label: 'Google', value: 'google' },
+              { label: 'OpenRouter', value: 'openrouter' },
+              { label: 'Fireworks', value: 'fireworks' },
+              { label: 'Baseten', value: 'baseten' },
+              { label: 'Ollama', value: 'ollama' },
+            ],
+          },
+        });
 
       const output = document.getElementById('editorOutput');
 
