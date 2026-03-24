@@ -162,7 +162,7 @@
     <div class="hero-inner">
       <span class="eyebrow">Developer Guide</span>
       <h1>MNBEditor</h1>
-      <p class="subtitle">A browser-based rich text editor with a document-style workspace, configurable toolbars, visual/code/preview modes, font management, page ruler controls, alerts, modal forms, and an extensible tool system.</p>
+      <p class="subtitle">A browser-based rich text editor with a document-style workspace, configurable toolbars, visual/code/preview modes, font management, page ruler controls, built-in AI assistance, API-backed spellchecking, alerts, modal forms, and an extensible tool system.</p>
     </div>
   </header>
 
@@ -181,6 +181,9 @@
       <a href="#branding">Branding</a>
       <a href="#limits">Content limits</a>
       <a href="#views">Views</a>
+      <a href="#writing-assistance">Writing assistance</a>
+      <a href="#ai-assistance">AI assistance</a>
+      <a href="#spellchecker">Spellchecker</a>
       <a href="#tables">Tables</a>
       <a href="#notes">Practical notes</a>
     </nav>
@@ -192,6 +195,8 @@
           <div class="card"><strong>Toolbar presets</strong><p><code>minimal</code>, <code>basic</code>, and <code>full</code>.</p></div>
           <div class="card"><strong>Editing modes</strong><p>Visual editing, code view, and preview mode.</p></div>
           <div class="card"><strong>Font system</strong><p>Built-in fonts, external web fonts, and uploaded custom font files.</p></div>
+          <div class="card"><strong>AI assistance</strong><p>Modal-driven writing help with provider selection, prompt controls, multiple actions, and document insertion modes.</p></div>
+          <div class="card"><strong>Spellchecker</strong><p>API-backed spellchecking with language selection, inline highlights, suggestions, ignore, and clear-all controls.</p></div>
           <div class="card"><strong>Extension model</strong><p>Plain-object tools using <code>buttonTool(...)</code> and <code>selectTool(...)</code>.</p></div>
         </div>
       </section>
@@ -345,6 +350,65 @@ export default buttonTool({
       <section id="views">
         <h2>Views</h2>
         <div class="note">MNBEditor supports visual mode, code mode, and preview mode. Preview is rendered inside an isolated iframe and receives external font links, generated <code>@font-face</code> CSS, and editor content.</div>
+      </section>
+
+      <section id="writing-assistance">
+        <h2>Writing assistance</h2>
+        <p>MNBEditor can expose two writing-help tools in the toolbar: an AI command for generation and rewriting workflows, and a spellcheck command for language-aware typo detection and correction.</p>
+
+        <h3 id="ai-assistance">AI assistance</h3>
+        <p>The AI tool is implemented as a <code>buttonTool(...)</code> with the id <code>ai-integration</code>. When activated, it opens a modal where the user chooses a provider, action, temperature, optional prompt, and how the result should be inserted back into the document.</p>
+        <div class="grid">
+          <div class="card"><strong>Supported actions</strong><p><code>improve</code>, <code>rewrite</code>, <code>summarize</code>, <code>continue</code>, <code>translate</code>, and <code>custom</code>.</p></div>
+          <div class="card"><strong>Insert modes</strong><p><code>replace-selection</code>, <code>insert-below</code>, and <code>append-end</code>.</p></div>
+          <div class="card"><strong>Providers</strong><p>Anthropic, OpenAI, Google, OpenRouter, Fireworks, Baseten, and Ollama.</p></div>
+        </div>
+        <ul>
+          <li>If <code>options.ai.endpoint</code> is configured, the tool runs in backend mode and posts the request to your server endpoint.</li>
+          <li>If no endpoint is configured, the tool runs in direct browser mode and calls the selected provider directly.</li>
+          <li>The modal can optionally include the full document text as context in addition to the current selection.</li>
+          <li>Results are inserted directly into the editor and then synced through history, status, and input updates.</li>
+        </ul>
+        <pre><code>mountMNBEditor('#editor', {
+  ai: {
+    endpoint: '',
+    defaultProvider: 'openai',
+    defaultAction: 'improve',
+    defaultApplyMode: 'replace-selection',
+    includeDocumentDefault: false,
+    providers: [
+      { label: 'Anthropic', value: 'anthropic' },
+      { label: 'OpenAI', value: 'openai' },
+      { label: 'Google', value: 'google' },
+      { label: 'OpenRouter', value: 'openrouter' },
+      { label: 'Fireworks', value: 'fireworks' },
+      { label: 'Baseten', value: 'baseten' },
+      { label: 'Ollama', value: 'ollama' },
+    ],
+  },
+});</code></pre>
+        <div class="note">In direct browser mode, most providers require both an API key and a model name. Ollama allows a local flow and treats the API key as optional.</div>
+
+        <h3 id="spellchecker">Spellchecker</h3>
+        <p>The spellchecker is implemented as a <code>selectTool(...)</code> with the id <code>spellcheck</code>. Choosing a language immediately runs the spellcheck request and highlights misspelled words inline inside the editor surface.</p>
+        <div class="grid">
+          <div class="card"><strong>Language-aware</strong><p>Starts with fallback languages such as English, Hindi, Telugu, Tamil, French, German, Spanish, Portuguese, Russian, Ukrainian, and Vietnamese, and can load more from the API.</p></div>
+          <div class="card"><strong>Inline review</strong><p>Misspelled words are wrapped with a red wavy underline and a hoverable/clickable mark.</p></div>
+          <div class="card"><strong>Correction flow</strong><p>Clicking a marked word opens a popover with suggestions plus <code>Ignore</code> and <code>Clear all</code> actions.</p></div>
+        </div>
+        <ul>
+          <li>The tool posts the current plain text content to a spellcheck API endpoint together with the selected language code.</li>
+          <li>Each accepted suggestion replaces the marked word and refreshes editor history, preview, and status state.</li>
+          <li>Ignored words are unwrapped from the highlight layer without changing their text.</li>
+          <li>The selected language is also applied to the editing surface so browser and assistive tools can inherit the document language.</li>
+        </ul>
+        <pre><code>selectTool({
+  id: 'spellcheck',
+  label: 'Spellcheck',
+  value: 'en',
+  usage: 'Choose spellcheck language from the dropdown. Selecting a language runs the PHP spellcheck API immediately.',
+});</code></pre>
+        <div class="note">This is more than passive browser spellcheck: the shared source implements a custom API-backed review flow with highlight rendering, suggestion popovers, ignore handling, and a clear-all command.</div>
       </section>
 
       <section id="tables">
